@@ -1,0 +1,12 @@
+langchain
+langchain-groq
+python-dotenv
+requests
+scikit-learn
+numpy
+rich
+torch
+datasets
+nltk
+matplotlib
+flask
