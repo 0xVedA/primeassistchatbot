@@ -1,0 +1,14 @@
+{
+  "session_id": "721559f8-bc18-4189-b4ce-43536fae326c",
+  "created_at": "2026-02-11T01:59:17.458877",
+  "turns": [
+    {
+      "timestamp": "2026-02-11T01:59:17.458893",
+      "user": "hi",
+      "bot": "Thank you for reaching out! I'm sorry if there seems to be a misunderstanding. I'm here to assist you and connect you with a human agent who can help clarify any confusion and answer any questions you may have. Just give me a moment to find the right representative for you. Your satisfaction is our priority, and we'll ensure that your concerns are addressed.",
+      "intent": "contact_human_agent",
+      "confidence": 0.393
+    }
+  ],
+  "updated_at": "2026-02-11T01:59:17.458902"
+}

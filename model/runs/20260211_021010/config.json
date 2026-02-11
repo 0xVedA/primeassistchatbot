@@ -1,0 +1,17 @@
+{
+  "vocab_size": 2519,
+  "embed_dim": 128,
+  "hidden_dim": 128,
+  "num_classes": 27,
+  "max_seq_len": 40,
+  "num_lstm_layers": 2,
+  "dropout": 0.5,
+  "max_epochs": 100,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "test_split": 0.2,
+  "patience": 5,
+  "dataset_size": 26872,
+  "train_size": 21497,
+  "test_size": 5375
+}
