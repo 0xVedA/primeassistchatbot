@@ -13,10 +13,15 @@ import torch
 import torch.nn as nn
 
 # ─── Attempt to import nltk (must mirror train_rnn.py) ───────────────────────
+# Keep interrogative words — they carry critical intent information
+KEEP_WORDS = {"where", "what", "how", "when", "which", "why", "can", "could",
+              "would", "should", "want", "need", "track", "check", "cancel",
+              "change", "get", "find", "status"}
+
 try:
     from nltk.corpus import stopwords
     from nltk.stem import PorterStemmer
-    STOP_WORDS = set(stopwords.words("english"))
+    STOP_WORDS = set(stopwords.words("english")) - KEEP_WORDS
     STEMMER = PorterStemmer()
     HAS_NLTK = True
 except ImportError:

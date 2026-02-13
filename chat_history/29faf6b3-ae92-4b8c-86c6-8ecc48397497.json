@@ -1,0 +1,21 @@
+{
+  "session_id": "29faf6b3-ae92-4b8c-86c6-8ecc48397497",
+  "created_at": "2026-02-12T09:39:13.161172",
+  "turns": [
+    {
+      "timestamp": "2026-02-12T09:39:13.161185",
+      "user": "i want my money back",
+      "bot": "I'll look into a refund for you. Could you please provide your **order number**?",
+      "intent": "get_refund",
+      "confidence": 0.9882
+    },
+    {
+      "timestamp": "2026-02-12T09:39:18.798957",
+      "user": "1111",
+      "bot": "I couldn't find order **ORD-1111** in our system. Please double-check the order number and try again.",
+      "intent": "create_account",
+      "confidence": 0.0794
+    }
+  ],
+  "updated_at": "2026-02-12T09:39:18.798975"
+}

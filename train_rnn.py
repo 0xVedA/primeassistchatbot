@@ -1,20 +1,11 @@
 """
-train_rnn.py  — Improved with techniques from lecture notebooks
+train_rnn.py  
 ================================================================
 Downloads the Bitext Customer Support dataset, applies proper
-preprocessing and training procedures from the course lectures,
+preprocessing and training proceduress,
 trains a PyTorch bidirectional LSTM intent-classifier, evaluates
 it with a classification report + confusion matrix, and saves all
 artifacts to the  model/  directory.
-
-Techniques applied (referenced by source lecture):
-  - Lec 3: Missing-data checks, class-distribution analysis
-  - Lec 4: 80/20 train/test split, classification report
-  - Lec 5: Confusion matrix, hyperparameter tuning
-  - Lec 6: StandardScaler, Early Stopping, train/val loss plotting,
-           Dropout regularization, PyTorch train/eval loop
-  - Lec 7: Text tokenization, sequence padding, word->index vocab,
-           Embedding -> LSTM -> Dense architecture, adam optimizer
 
 Usage:
     python train_rnn.py
@@ -23,7 +14,7 @@ Usage:
 import json, os, pickle, re, string, shutil
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")                       # non-interactive backend
+matplotlib.use("Agg")                       
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -33,13 +24,19 @@ from torch.utils.data import DataLoader, TensorDataset
 from datasets import load_dataset
 from collections import Counter
 
-# ─── Attempt to import nltk for stopword removal (Lec 7 cell 14) ─────────────
+# ─── Attempt to import nltk for stopword removal ─────────────
+# Keep interrogative words — they carry critical intent information
+# (e.g. "where is my order" vs "place an order" both reduce to "order" without them)
+KEEP_WORDS = {"where", "what", "how", "when", "which", "why", "can", "could",
+              "would", "should", "want", "need", "track", "check", "cancel",
+              "change", "get", "find", "status"}
+
 try:
     from nltk.corpus import stopwords
     from nltk.stem import PorterStemmer
     import nltk
     nltk.download("stopwords", quiet=True)
-    STOP_WORDS = set(stopwords.words("english"))
+    STOP_WORDS = set(stopwords.words("english")) - KEEP_WORDS
     STEMMER = PorterStemmer()
     HAS_NLTK = True
 except ImportError:
@@ -47,27 +44,27 @@ except ImportError:
     STOP_WORDS = set()
     STEMMER = None
 
-# ========================== CONFIG ============================================
+# ========================== COnfigurations ==============================================-=-=-=-=-=
 SAVE_DIR       = "model"
 RUNS_DIR       = os.path.join(SAVE_DIR, "runs")
 VOCAB_SIZE     = 8000
 MAX_SEQ_LEN    = 40
-EMBED_DIM      = 128          # increased from 64 (Lec 7 cell 23: 256)
-HIDDEN_DIM     = 128          # (Lec 7 cell 23: 1024, scaled for our task)
-NUM_LSTM_LAYERS = 2           # deeper LSTM (Lec 7 improvement notes)
-DROPOUT        = 0.5          # Lec 7 cell 4 uses 0.6, Lec 6 cell 21 discusses dropout
-EPOCHS         = 100          # more epochs w/ early stopping (Lec 6 cell 10)
+EMBED_DIM      = 128          # increased from 64 
+HIDDEN_DIM     = 128          # (scaled for our task)
+NUM_LSTM_LAYERS = 2           # deepe1 LSTM
+DROPOUT        = 0.5          # as mam said in lectures
+EPOCHS         = 100          # more epochs w/ early stopping 
 BATCH_SIZE     = 64
 LEARNING_RATE  = 1e-3
-TEST_SPLIT     = 0.20         # 80/20 split (Lec 4 cell 20)
-PATIENCE       = 5            # early stopping patience (Lec 6 cell 10: patience=10)
+TEST_SPLIT     = 0.20         # 80/20 split 
+PATIENCE       = 5            # for early stopping 
 # ==============================================================================
 
 
-# ─── TEXT PREPROCESSING (Lec 7 cell 14) ──────────────────────────────────────
+# ─── TEXT PREPROCESSING (L 7) ──────────────────────────────────────
 def preprocess_text(text: str) -> str:
     """
-    Apply text preprocessing steps as outlined in Lec 7:
+    Apply text preprocessing steps as outlined in    L 7:
     1. Lowercasing
     2. Remove non-alphabetic characters
     3. Tokenisation
@@ -77,7 +74,7 @@ def preprocess_text(text: str) -> str:
     # 1. Lowercase
     text = text.lower().strip()
 
-    # 2. Remove punctuation & non-alphabetic chars (Lec 7 step 6)
+    # 2. Remove punctuation & non-alphabetic chars (   L 7 step 6)
     text = text.translate(str.maketrans("", "", string.punctuation))
     text = re.sub(r"[^a-z\s]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
@@ -97,7 +94,7 @@ def preprocess_text(text: str) -> str:
     return " ".join(tokens)
 
 
-# ─── VOCAB & ENCODING (Lec 7 cells 18-19) ────────────────────────────────────
+# ─── VOCAB & ENCODING (   L 7    s 18-19) ────────────────────────────────────
 def build_vocab(texts: list[str], vocab_size: int) -> dict[str, int]:
     """Build word -> index mapping.  0 = PAD, 1 = UNK."""
     counter: Counter = Counter()
@@ -110,7 +107,7 @@ def build_vocab(texts: list[str], vocab_size: int) -> dict[str, int]:
 
 
 def encode(texts: list[str], vocab: dict[str, int], max_len: int) -> np.ndarray:
-    """Tokenise + pad/truncate to fixed length (Lec 7: pad_sequences)."""
+    """Tokenise + pad/truncate to fixed length (   L 7: pad_sequences)."""
     unk = vocab["<UNK>"]
     encoded = []
     for t in texts:
@@ -120,12 +117,12 @@ def encode(texts: list[str], vocab: dict[str, int], max_len: int) -> np.ndarray:
     return np.array(encoded, dtype=np.int64)
 
 
-# ─── LSTM MODEL (Lec 7 cells 20, 23 + Lec 6 cell 14) ────────────────────────
+# ─── LSTM MODEL (   L 7    s 20, 23 +    L 6     14) ────────────────────────
 class IntentLSTM(nn.Module):
     """
     Embedding -> Bidirectional LSTM (stacked) -> Dropout -> Dense -> Softmax.
-    Architecture follows Lec 7 pattern (Embedding + LSTM + Dense)
-    with improvements from Lec 6 (Dropout regularisation).
+    Architecture follows    L 7 pattern (Embedding + LSTM + Dense)
+    with improvements from    L 6 (Dropout regularisation).
     """
     def __init__(self, vocab_size: int, embed_dim: int, hidden_dim: int,
                  num_classes: int, num_layers: int = 2, dropout: float = 0.5):
@@ -138,7 +135,7 @@ class IntentLSTM(nn.Module):
             bidirectional=True,
             dropout=dropout if num_layers > 1 else 0.0,
         )
-        self.dropout = nn.Dropout(dropout)       # Lec 6 cell 21, Lec 7 cell 4
+        self.dropout = nn.Dropout(dropout)       #    L 6     21,    L 7     4
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # *2 for bidirectional
 
     def forward(self, x):
@@ -149,11 +146,11 @@ class IntentLSTM(nn.Module):
         return self.fc(self.dropout(h))
 
 
-# ─── EARLY STOPPING (Lec 6 cell 10) ──────────────────────────────────────────
+# ─── EARLY STOPPING (   L 6     10) ──────────────────────────────────────────
 class EarlyStopping:
     """
     Stops training when val_loss does not improve for `patience` epochs.
-    Restores best model weights (Lec 6: restore_best_weights=True).
+    Restores best model weights (   L 6: restore_best_weights=True).
     """
     def __init__(self, patience: int = 5):
         self.patience = patience
@@ -279,23 +276,23 @@ def main():
     )
     print(f"    Loaded {len(ds)} samples")
 
-    # ── 2. Data analysis (Lec 3: null checks, Lec 5: distribution) ────────
+    # ── 2. Data analysis (   L 3: null checks,    L 5: distribution) ────────
     print("\n[*] Data Analysis ...")
 
-    # Check for missing values (Lec 3 cell 4: isnull().sum())
+    # Check for missing values (   L 3     4: isnull().sum())
     import pandas as pd
     df = pd.DataFrame(ds)
     missing = df.isnull().sum()
     print(f"    Missing values per column:\n{missing.to_string()}")
 
-    # Class distribution (Lec 5 cell 13: distribution of target classes)
+    # Class distribution (   L 5     13: distribution of target classes)
     intent_counts = df["intent"].value_counts()
     print(f"\n    Intent distribution ({len(intent_counts)} intents):")
     print(f"    Min samples: {intent_counts.min()} ({intent_counts.idxmin()})")
     print(f"    Max samples: {intent_counts.max()} ({intent_counts.idxmax()})")
     print(f"    Mean: {intent_counts.mean():.0f}, Std: {intent_counts.std():.0f}")
 
-    # ── 3. Text preprocessing (Lec 7 cell 14) ────────────────────────────────
+    # ── 3. Text preprocessing (   L 7       ) ────────────────────────────────
     print("\n[*] Preprocessing text ...")
     instructions = [preprocess_text(row["instruction"]) for row in ds]
     intents      = [row["intent"] for row in ds]
@@ -315,12 +312,12 @@ def main():
 
     labels = np.array([intent2idx[i] for i in intents], dtype=np.int64)
 
-    # ── 5. Build vocab & encode (Lec 7 cells 18-19) ──────────────────────────
+    # ── 5. Build vocab & encode (   L 7    s 18-19) ──────────────────────────
     vocab = build_vocab(instructions, VOCAB_SIZE)
     X     = encode(instructions, vocab, MAX_SEQ_LEN)
     print(f"    Vocab size: {len(vocab)}")
 
-    # ── 6. Train / test split — 80/20 (Lec 4 cell 20) ────────────────────────
+    # ── 6. Train / test split — 80/20 (   L 4     20) ────────────────────────
     n = len(X)
     perm = np.random.default_rng(42).permutation(n)
     split = int(n * (1 - TEST_SPLIT))
@@ -335,12 +332,12 @@ def main():
 
     print(f"    Train: {len(X_train)}, Test: {len(X_test)}")
 
-    # ── 6b. K-Fold Cross-Validation (Lec 5) ──────────────────────────────────
-    from sklearn.model_selection import KFold
+    # ── 6b. K-Fold Cross-Validation (   L 5) ──────────────────────────────────
+    from sklearn.model_se   Ltion import KFold
 
     K_FOLDS = 5
     KFOLD_EPOCHS = 15  # fewer epochs per fold for speed
-    print(f"\n[*] {K_FOLDS}-Fold Cross-Validation (Lec 5) ...")
+    print(f"\n[*] {K_FOLDS}-Fold Cross-Validation (   L 5) ...")
 
     kf = KFold(n_splits=K_FOLDS, shuffle=True, random_state=42)
     fold_accuracies = []
@@ -407,7 +404,7 @@ def main():
     print(f"\n    CV Result:  {cv_mean_acc:.4f} ± {cv_std_acc:.4f} accuracy")
     print(f"                {cv_mean_loss:.4f} mean loss")
 
-    # ── 7. Model, loss, optimiser (Lec 6 cells 14-15, Lec 7 cells 20-21) ─────
+    # ── 7. Model, loss, optimiser (   L 6    s 14-15,    L 7    s 20-21) ─────
     print(f"\n[*] Full training on 80/20 split ...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model  = IntentLSTM(
@@ -415,37 +412,37 @@ def main():
         num_layers=NUM_LSTM_LAYERS, dropout=DROPOUT,
     ).to(device)
 
-    criterion = nn.CrossEntropyLoss()     # = sparse_categorical_crossentropy (Lec 7 cell 21)
+    criterion = nn.CrossEntropyLoss()     # = sparse_categorical_crossentropy (   L 7     21)
     optimiser = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    # Learning rate scheduler (Lec 6 improvement: reduce LR on plateau)
+    # Learning rate scheduler (   L 6 improvement: reduce LR on plateau)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimiser, mode="min", factor=0.5, patience=3,
     )
 
-    # Early stopping (Lec 6 cell 10)
+    # Early stopping (   L 6     10)
     early_stop = EarlyStopping(patience=PATIENCE)
 
     print(f"\n[*] Training on {device} for up to {EPOCHS} epochs "
           f"(early stopping patience={PATIENCE}) ...\n")
 
-    # ── 8. Training loop (Lec 6 cell 16) ─────────────────────────────────────
+    # ── 8. Training loop (   L 6     16) ─────────────────────────────────────
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
     epochs_run = 0
 
     for epoch in range(1, EPOCHS + 1):
         epochs_run = epoch
         # --- Train ---
-        model.train()                    # Lec 6 cell 16: model.train()
+        model.train()                    #    L 6     16: model.train()
         total_loss, correct, total = 0.0, 0, 0
         for xb, yb in train_dl:
             xb, yb = xb.to(device), yb.to(device)
             logits = model(xb)
             loss = criterion(logits, yb)
 
-            optimiser.zero_grad()        # Lec 6 cell 16: optimizer.zero_grad()
-            loss.backward()              # Lec 6 cell 16: loss.backward()
-            optimiser.step()             # Lec 6 cell 16: optimizer.step()
+            optimiser.zero_grad()        #    L 6     16: optimizer.zero_grad()
+            loss.backward()              #    L 6     16: loss.backward()
+            optimiser.step()             #    L 6     16: optimizer.step()
 
             total_loss += loss.item() * xb.size(0)
             correct += (logits.argmax(1) == yb).sum().item()
@@ -454,7 +451,7 @@ def main():
         train_loss = total_loss / total
         train_acc  = correct / total
 
-        # --- Validate (Lec 6 cell 17: model.eval() + torch.no_grad()) ---
+        # --- Validate (   L 6     17: model.eval() + torch.no_grad()) ---
         model.eval()
         val_loss_sum, val_correct, val_total = 0.0, 0, 0
         with torch.no_grad():
@@ -468,7 +465,7 @@ def main():
         val_loss = val_loss_sum / val_total
         val_acc  = val_correct / val_total
 
-        # Record history for plotting (Lec 6 cell 9)
+        # Record history for plotting (   L 6     9)
         history["train_loss"].append(train_loss)
         history["val_loss"].append(val_loss)
         history["train_acc"].append(train_acc)
@@ -482,13 +479,13 @@ def main():
         # LR scheduler step
         scheduler.step(val_loss)
 
-        # Early stopping check (Lec 6 cell 10)
+        # Early stopping check (   L 6     10)
         if early_stop.step(val_loss, model):
             print(f"\n  >> Early stopping triggered at epoch {epoch}")
             early_stop.restore(model)
             break
 
-    # ── 9. Plot training vs validation loss/accuracy (Lec 6 cell 9) ───────────
+    # ── 9. Plot training vs validation loss/accuracy (   L 6     9) ───────────
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
 
     ax1.plot(history["train_loss"], label="Train Loss")
@@ -510,7 +507,7 @@ def main():
     plt.savefig(plot_path, dpi=150)
     print(f"\n    Training curves saved to {plot_path}")
 
-    # ── 10. Classification report & confusion matrix (Lec 4, Lec 5) ───────────
+    # ── 10. Classification report & confusion matrix (   L 4,    L 5) ───────────
     from sklearn.metrics import classification_report, confusion_matrix
 
     model.eval()
@@ -525,10 +522,10 @@ def main():
     target_names = [idx2intent[i] for i in range(num_classes)]
 
     cls_report = classification_report(all_labels, all_preds, target_names=target_names)
-    print("\n[*] Classification Report (Lec 4):\n")
+    print("\n[*] Classification Report (   L 4):\n")
     print(cls_report)
 
-    # Save confusion matrix (Lec 5)
+    # Save confusion matrix (   L 5)
     cm = confusion_matrix(all_labels, all_preds)
     fig_cm, ax_cm = plt.subplots(figsize=(14, 12))
     im = ax_cm.imshow(cm, interpolation="nearest", cmap="Blues")

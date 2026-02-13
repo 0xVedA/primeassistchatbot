@@ -1,0 +1,91 @@
+{
+  "session_id": "7f2f6fe5-bd0c-4a6b-8fcb-f1ce6d4009ce",
+  "created_at": "2026-02-11T22:29:42.916743",
+  "turns": [
+    {
+      "timestamp": "2026-02-11T22:29:42.916757",
+      "user": "where is my order",
+      "bot": "I'd be happy to help you track your order! Could you please provide your **order number**? (e.g. ORD-1003)",
+      "intent": "track_order",
+      "confidence": 0.85
+    },
+    {
+      "timestamp": "2026-02-11T22:29:47.948509",
+      "user": "ORD-1001",
+      "bot": "Here are the details for your order:\n\n**Order ORD-1001**\nProduct: Wireless Headphones\nStatus: Delivered\nTracking: TRK-50001\nOrder date: 2026-01-20\nEstimated delivery: 2026-01-27",
+      "intent": "contact_human_agent",
+      "confidence": 0.2649
+    },
+    {
+      "timestamp": "2026-02-11T22:30:02.683443",
+      "user": "when will i receive my order",
+      "bot": "Thank you for reaching out! I appreciate your need to place an order. You've come to the right place to get the assistance you require. Please provide me with the details of the item you'd like to order, and I'll be more than happy to help you through the process, ensuring a smooth and rewarding experience for you. Let's make this happen together!",
+      "intent": "place_order",
+      "confidence": 0.5452
+    },
+    {
+      "timestamp": "2026-02-11T22:30:14.930975",
+      "user": "i want my money back",
+      "bot": "I'll look into a refund for you. Could you please provide your **order number**?",
+      "intent": "get_refund",
+      "confidence": 0.9882
+    },
+    {
+      "timestamp": "2026-02-11T22:30:18.232109",
+      "user": "ORD-1001",
+      "bot": "Here is the refund information for order **ORD-1001**:\n\n**Refund REF-2001** (for order ORD-1001)\nAmount: $59.99\nStatus: Completed\nRequested: 2026-01-30\nProcessed: 2026-02-04",
+      "intent": "contact_human_agent",
+      "confidence": 0.2649
+    },
+    {
+      "timestamp": "2026-02-11T22:32:09.628049",
+      "user": "i dont want my order",
+      "bot": "I can help you with the cancellation. Could you please provide your **order number**?",
+      "intent": "cancel_order",
+      "confidence": 0.7223
+    },
+    {
+      "timestamp": "2026-02-11T22:32:14.201077",
+      "user": "lk",
+      "bot": "I couldn't find an order number in your message. Could you please provide it in the format **ORD-XXXX**? (e.g. ORD-1003)",
+      "intent": "create_account",
+      "confidence": 0.1057
+    },
+    {
+      "timestamp": "2026-02-11T22:33:06.463696",
+      "user": "how can i track my order",
+      "bot": "I couldn't find an order number in your message. Could you please provide it in the format **ORD-XXXX**? (e.g. ORD-1003)",
+      "intent": "track_order",
+      "confidence": 0.9941
+    },
+    {
+      "timestamp": "2026-02-11T22:33:24.578401",
+      "user": "ORD-1003",
+      "bot": "Order **ORD-1003** (Mechanical Keyboard) is currently **Processing**.\n\nTo confirm cancellation, please contact our support team or reply with **CONFIRM** to proceed.",
+      "intent": "contact_human_agent",
+      "confidence": 0.2649
+    },
+    {
+      "timestamp": "2026-02-11T22:33:32.984762",
+      "user": "contact",
+      "bot": "Thank you for reaching out! I'm sorry if there seems to be a misunderstanding. I'm here to assist you and connect you with a human agent who can help clarify any confusion and answer any questions you may have. Just give me a moment to find the right representative for you. Your satisfaction is our priority, and we'll ensure that your concerns are addressed.",
+      "intent": "contact_human_agent",
+      "confidence": 0.9914
+    },
+    {
+      "timestamp": "2026-02-11T22:33:41.732889",
+      "user": "how can i track my order",
+      "bot": "I'd be happy to help you track your order! Could you please provide your **order number**? (e.g. ORD-1003)",
+      "intent": "track_order",
+      "confidence": 0.9941
+    },
+    {
+      "timestamp": "2026-02-11T22:33:45.232373",
+      "user": "ORD-1003",
+      "bot": "Here are the details for your order:\n\n**Order ORD-1003**\nProduct: Mechanical Keyboard\nStatus: Processing\nOrder date: 2026-02-09\nEstimated delivery: 2026-02-18",
+      "intent": "contact_human_agent",
+      "confidence": 0.2649
+    }
+  ],
+  "updated_at": "2026-02-11T22:33:45.232389"
+}

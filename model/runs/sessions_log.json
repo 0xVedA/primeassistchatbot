@@ -68,5 +68,45 @@
         0.9929
       ]
     }
+  },
+  {
+    "run_id": "20260211_201411",
+    "timestamp": "2026-02-11T20:14:11.837459",
+    "epochs_run": 10,
+    "max_epochs": 100,
+    "early_stopped": true,
+    "final_train_acc": 0.9994,
+    "final_val_acc": 0.992,
+    "final_train_loss": 0.0034,
+    "final_val_loss": 0.0322,
+    "best_val_loss": 0.0318,
+    "best_val_acc": 0.992,
+    "config": {
+      "vocab_size": 2525,
+      "embed_dim": 128,
+      "hidden_dim": 128,
+      "num_classes": 27,
+      "max_seq_len": 40,
+      "num_lstm_layers": 2,
+      "dropout": 0.5,
+      "max_epochs": 100,
+      "batch_size": 64,
+      "learning_rate": 0.001,
+      "test_split": 0.2,
+      "patience": 5,
+      "dataset_size": 26872,
+      "train_size": 21497,
+      "test_size": 5375,
+      "cv_folds": 5,
+      "cv_mean_acc": 0.9925,
+      "cv_std_acc": 0.0013,
+      "cv_fold_accuracies": [
+        0.9939,
+        0.9924,
+        0.9901,
+        0.9933,
+        0.9929
+      ]
+    }
   }
 ]

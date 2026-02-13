@@ -1,0 +1,84 @@
+{
+  "session_id": "35a1f959-c4e3-428d-9fbc-0fc09b2646d1",
+  "created_at": "2026-02-11T19:28:27.976083",
+  "turns": [
+    {
+      "timestamp": "2026-02-11T19:28:27.976097",
+      "user": "my order where",
+      "bot": "Thank you for reaching out! I appreciate your need to place an order. You've come to the right place to get the assistance you require. Please provide me with the details of the item you'd like to order, and I'll be more than happy to help you through the process, ensuring a smooth and rewarding experience for you. Let's make this happen together!",
+      "intent": "place_order",
+      "confidence": 0.9965
+    },
+    {
+      "timestamp": "2026-02-11T19:28:57.527754",
+      "user": "ORD-1001",
+      "bot": "Thank you for reaching out! I'm sorry if there seems to be a misunderstanding. I'm here to assist you and connect you with a human agent who can help clarify any confusion and answer any questions you may have. Just give me a moment to find the right representative for you. Your satisfaction is our priority, and we'll ensure that your concerns are addressed.",
+      "intent": "contact_human_agent",
+      "confidence": 0.4401
+    },
+    {
+      "timestamp": "2026-02-11T19:29:13.121457",
+      "user": "where is my order",
+      "bot": "Thank you for reaching out! I appreciate your need to place an order. You've come to the right place to get the assistance you require. Please provide me with the details of the item you'd like to order, and I'll be more than happy to help you through the process, ensuring a smooth and rewarding experience for you. Let's make this happen together!",
+      "intent": "place_order",
+      "confidence": 0.9965
+    },
+    {
+      "timestamp": "2026-02-11T19:29:19.742509",
+      "user": "ORD-1001",
+      "bot": "Thank you for reaching out! I'm sorry if there seems to be a misunderstanding. I'm here to assist you and connect you with a human agent who can help clarify any confusion and answer any questions you may have. Just give me a moment to find the right representative for you. Your satisfaction is our priority, and we'll ensure that your concerns are addressed.",
+      "intent": "contact_human_agent",
+      "confidence": 0.4401
+    },
+    {
+      "timestamp": "2026-02-11T19:29:27.832309",
+      "user": "refund",
+      "bot": "I'll look into a refund for you. Could you please provide your **order number**?",
+      "intent": "get_refund",
+      "confidence": 0.9256
+    },
+    {
+      "timestamp": "2026-02-11T19:29:30.378630",
+      "user": "ORD-1001",
+      "bot": "Here is the refund information for order **ORD-1001**:\n\n**Refund REF-2001** (for order ORD-1001)\nAmount: $59.99\nStatus: Completed\nRequested: 2026-01-30\nProcessed: 2026-02-04",
+      "intent": "contact_human_agent",
+      "confidence": 0.4401
+    },
+    {
+      "timestamp": "2026-02-11T19:29:33.830176",
+      "user": "Where is my order?",
+      "bot": "Thank you for reaching out! I appreciate your need to place an order. You've come to the right place to get the assistance you require. Please provide me with the details of the item you'd like to order, and I'll be more than happy to help you through the process, ensuring a smooth and rewarding experience for you. Let's make this happen together!",
+      "intent": "place_order",
+      "confidence": 0.9965
+    },
+    {
+      "timestamp": "2026-02-11T19:29:52.965963",
+      "user": "Wireless Headphones",
+      "bot": "Let me look into that. Could you provide your **email address**?",
+      "intent": "registration_problems",
+      "confidence": 0.4492
+    },
+    {
+      "timestamp": "2026-02-11T19:30:00.262154",
+      "user": "alice@example.com",
+      "bot": "Here is your account:\n\n**Account for Alice Johnson**\nEmail: alice@example.com\nPhone: +1-555-0101\nShipping address: 123 Oak St, New York, NY 10001\nMember since: 2024-03-15",
+      "intent": "registration_problems",
+      "confidence": 0.1881
+    },
+    {
+      "timestamp": "2026-02-11T19:30:20.608899",
+      "user": "where is my order",
+      "bot": "Thank you for reaching out! I appreciate your need to place an order. You've come to the right place to get the assistance you require. Please provide me with the details of the item you'd like to order, and I'll be more than happy to help you through the process, ensuring a smooth and rewarding experience for you. Let's make this happen together!",
+      "intent": "place_order",
+      "confidence": 0.9965
+    },
+    {
+      "timestamp": "2026-02-11T19:30:28.788271",
+      "user": "where is my order",
+      "bot": "Thank you for reaching out! I appreciate your need to place an order. You've come to the right place to get the assistance you require. Please provide me with the details of the item you'd like to order, and I'll be more than happy to help you through the process, ensuring a smooth and rewarding experience for you. Let's make this happen together!",
+      "intent": "place_order",
+      "confidence": 0.9965
+    }
+  ],
+  "updated_at": "2026-02-11T19:30:28.788292"
+}

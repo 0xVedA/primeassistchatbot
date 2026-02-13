@@ -1,0 +1,21 @@
+{
+  "session_id": "5c0091c6-3bc0-4272-9b0d-c5637be6c088",
+  "created_at": "2026-02-12T11:29:54.194836",
+  "turns": [
+    {
+      "timestamp": "2026-02-12T11:29:54.194863",
+      "user": "WHERE IS MY ORDER",
+      "bot": "I'd be happy to help you track your order! Could you please provide your **order number**? (e.g. ORD-1003)",
+      "intent": "track_order",
+      "confidence": 0.85
+    },
+    {
+      "timestamp": "2026-02-12T11:30:03.915256",
+      "user": "ORD-1001",
+      "bot": "Here are the details for your order:\n\n**Order ORD-1001**\nProduct: Wireless Headphones\nStatus: Delivered\nTracking: TRK-50001\nOrder date: 2026-01-20\nEstimated delivery: 2026-01-27",
+      "intent": "contact_human_agent",
+      "confidence": 0.2649
+    }
+  ],
+  "updated_at": "2026-02-12T11:30:03.915272"
+}

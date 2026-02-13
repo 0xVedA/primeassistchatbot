@@ -6,7 +6,7 @@ Chat history is saved to the  chat_history/  folder as JSON files.
 Usage:  python server.py
 """
 
-import json, os, uuid
+import json, os, re, uuid
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from app.rnn_matcher import RNNMatcher
@@ -14,8 +14,17 @@ from app.conversation import handle
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
-# Load model once at startup
-matcher = RNNMatcher("model")
+# Lazy-load model: start server quickly, load model on first request
+matcher = None
+def get_matcher():
+    global matcher
+    if matcher is None:
+        print("Loading RNN model (this may take a few seconds)...")
+        import time
+        t0 = time.time()
+        matcher = RNNMatcher("model")
+        print(f"RNN model loaded in {time.time() - t0:.2f}s")
+    return matcher
 
 # ── Chat history ──────────────────────────────────────────────────────────────
 HISTORY_DIR = os.path.join(os.path.dirname(__file__), "chat_history")
@@ -67,8 +76,31 @@ def chat():
     if not user_msg:
         return jsonify({"reply": "Please type a message.", "intent": "", "confidence": 0})
 
-    # Get RNN prediction
-    intent, rnn_response, confidence = matcher.predict(user_msg)
+    # Get RNN prediction (model will be loaded on first call)
+    m = get_matcher()
+    intent, rnn_response, confidence = m.predict(user_msg)
+
+    # ── Low-confidence keyword fallback ──────────────────────────────────
+    # The training data doesn't cover all common phrasings (e.g. "where is
+    # my order").  When the model is uncertain, use keyword heuristics.
+    if confidence < 0.75:
+        msg_lower = user_msg.lower()
+        keyword_rules = [
+            (r"\b(where|track|status|eta)\b.*\b(order|package|shipment|delivery)\b", "track_order"),
+            (r"\b(order|package|shipment|delivery)\b.*\b(where|track|status|eta)\b", "track_order"),
+            (r"\b(where|status).*\brefund\b",  "track_refund"),
+            (r"\brefund\b.*\b(where|status)\b", "track_refund"),
+            (r"\b(cancel)\b.*\border\b",       "cancel_order"),
+            (r"\border\b.*\b(cancel)\b",       "cancel_order"),
+            (r"\b(recover|forgot|reset)\b.*\bpassword\b",   "recover_password"),
+            (r"\bpassword\b.*\b(recover|forgot|reset)\b",   "recover_password"),
+        ]
+        for pattern, corrected_intent in keyword_rules:
+            if re.search(pattern, msg_lower):
+                intent = corrected_intent
+                rnn_response = m.intent_responses.get(intent, rnn_response)
+                confidence = 0.85  # mark as keyword-assisted
+                break
 
     # Run through conversation engine (may ask follow-up or do DB lookup)
     reply = handle(session_id, user_msg, intent, rnn_response, confidence)
