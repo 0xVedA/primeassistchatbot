@@ -7,6 +7,9 @@ trains a PyTorch bidirectional LSTM intent-classifier, evaluates
 it with a classification report + confusion matrix, and saves all
 artifacts to the  model/  directory.
 
+
+Why we are using Pytorch becz Tensorflow is not working in 3.14 python
+
 Usage:
     python train_rnn.py
 """
@@ -24,7 +27,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from datasets import load_dataset
 from collections import Counter
 
-# ─── Attempt to import nltk for stopword removal ─────────────
+# ─── importing nltk for stopword removal ─────────────
 # Keep interrogative words — they carry critical intent information
 # (e.g. "where is my order" vs "place an order" both reduce to "order" without them)
 KEEP_WORDS = {"where", "what", "how", "when", "which", "why", "can", "could",
@@ -61,10 +64,10 @@ PATIENCE       = 5            # for early stopping
 # ==============================================================================
 
 
-# ─── TEXT PREPROCESSING (L 7) ──────────────────────────────────────
+# ─── TEXT PREPROCESSING ──────────────────────────────────────
 def preprocess_text(text: str) -> str:
     """
-    Apply text preprocessing steps as outlined in    L 7:
+    Applying text preprocessing step:
     1. Lowercasing
     2. Remove non-alphabetic characters
     3. Tokenisation
@@ -74,7 +77,7 @@ def preprocess_text(text: str) -> str:
     # 1. Lowercase
     text = text.lower().strip()
 
-    # 2. Remove punctuation & non-alphabetic chars (   L 7 step 6)
+    # 2. Remove punctuation & non-alphabetic chars
     text = text.translate(str.maketrans("", "", string.punctuation))
     text = re.sub(r"[^a-z\s]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
@@ -89,12 +92,12 @@ def preprocess_text(text: str) -> str:
                        "me", "we", "our", "you", "your", "it", "its", "to", "of",
                        "in", "on", "for", "with", "and", "or", "but", "not", "do",
                        "does", "did", "have", "has", "had", "be", "been", "am"}
-        tokens = [w for w in tokens if w not in basic_stops]
+        tokens = [w for w in tokens if w not in basic_stops] #every word will be compared and if word matches to basic stops will be removed
 
     return " ".join(tokens)
 
 
-# ─── VOCAB & ENCODING (   L 7    s 18-19) ────────────────────────────────────
+# ─── VOCAB & ENCODING (since we are using Pytorch down is an alternative to tensorflow.keras.preprocessing.text.Tokenizer the following fuction will implemnt the logic) ────────────────────────────────────
 def build_vocab(texts: list[str], vocab_size: int) -> dict[str, int]:
     """Build word -> index mapping.  0 = PAD, 1 = UNK."""
     counter: Counter = Counter()
@@ -105,9 +108,9 @@ def build_vocab(texts: list[str], vocab_size: int) -> dict[str, int]:
         vocab[word] = len(vocab)
     return vocab
 
-
+#  below is equivalent to "from tensorflow.keras.preprocessing.sequence import pad_sequences" 
 def encode(texts: list[str], vocab: dict[str, int], max_len: int) -> np.ndarray:
-    """Tokenise + pad/truncate to fixed length (   L 7: pad_sequences)."""
+    """Tokenise + pad/truncate to fixed length ( L7 pad_sequences)."""
     unk = vocab["<UNK>"]
     encoded = []
     for t in texts:
@@ -117,7 +120,7 @@ def encode(texts: list[str], vocab: dict[str, int], max_len: int) -> np.ndarray:
     return np.array(encoded, dtype=np.int64)
 
 
-# ─── LSTM MODEL (   L 7    s 20, 23 +    L 6     14) ────────────────────────
+# ─── LSTM MODEL  ────────────────────────
 class IntentLSTM(nn.Module):
     """
     Embedding -> Bidirectional LSTM (stacked) -> Dropout -> Dense -> Softmax.
@@ -135,14 +138,14 @@ class IntentLSTM(nn.Module):
             bidirectional=True,
             dropout=dropout if num_layers > 1 else 0.0,
         )
-        self.dropout = nn.Dropout(dropout)       #    L 6     21,    L 7     4
+        self.dropout = nn.Dropout(dropout)      
         self.fc = nn.Linear(hidden_dim * 2, num_classes)  # *2 for bidirectional
 
-    def forward(self, x):
-        emb = self.embedding(x)                          # (B, T, E)
-        _, (h, _) = self.lstm(emb)                       # h: (2*L, B, H)
+    def forward(self, x):                       # this is like model.fit()
+        emb = self.embedding(x)                          
+        _, (h, _) = self.lstm(emb)                       
         # take last layer forward + backward
-        h = torch.cat((h[-2], h[-1]), dim=1)             # (B, 2H)
+        h = torch.cat((h[-2], h[-1]), dim=1)             
         return self.fc(self.dropout(h))
 
 
@@ -263,7 +266,7 @@ def archive_session(history: dict, config: dict, final_val_acc: float,
 
     return session_info
 
-
+"--------------------------here we are starting main ----------------------------------------------------------------------------------------"
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 def main():
     os.makedirs(SAVE_DIR, exist_ok=True)
@@ -404,7 +407,7 @@ def main():
     print(f"\n    CV Result:  {cv_mean_acc:.4f} ± {cv_std_acc:.4f} accuracy")
     print(f"                {cv_mean_loss:.4f} mean loss")
 
-    # ── 7. Model, loss, optimiser (   L 6    s 14-15,    L 7    s 20-21) ─────
+    # ── 7. Model, loss, optimiser
     print(f"\n[*] Full training on 80/20 split ...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model  = IntentLSTM(
@@ -412,7 +415,7 @@ def main():
         num_layers=NUM_LSTM_LAYERS, dropout=DROPOUT,
     ).to(device)
 
-    criterion = nn.CrossEntropyLoss()     # = sparse_categorical_crossentropy (   L 7     21)
+    criterion = nn.CrossEntropyLoss()     # = sparse_categorical_crossentropy ()
     optimiser = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # Learning rate scheduler (   L 6 improvement: reduce LR on plateau)
@@ -420,13 +423,13 @@ def main():
         optimiser, mode="min", factor=0.5, patience=3,
     )
 
-    # Early stopping (   L 6     10)
+    # Early stopping 
     early_stop = EarlyStopping(patience=PATIENCE)
 
     print(f"\n[*] Training on {device} for up to {EPOCHS} epochs "
           f"(early stopping patience={PATIENCE}) ...\n")
 
-    # ── 8. Training loop (   L 6     16) ─────────────────────────────────────
+    # ── 8. Training loop () ─────────────────────────────────────
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
     epochs_run = 0
 
@@ -451,7 +454,7 @@ def main():
         train_loss = total_loss / total
         train_acc  = correct / total
 
-        # --- Validate (   L 6     17: model.eval() + torch.no_grad()) ---
+        # --- Validate () ---
         model.eval()
         val_loss_sum, val_correct, val_total = 0.0, 0, 0
         with torch.no_grad():
@@ -507,7 +510,7 @@ def main():
     plt.savefig(plot_path, dpi=150)
     print(f"\n    Training curves saved to {plot_path}")
 
-    # ── 10. Classification report & confusion matrix (   L 4,    L 5) ───────────
+    # ── 10. Classification report & confusion matrix () ───────────
     from sklearn.metrics import classification_report, confusion_matrix
 
     model.eval()
